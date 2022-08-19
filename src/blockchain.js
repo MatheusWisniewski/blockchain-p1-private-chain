@@ -126,13 +126,17 @@ const hex2ascii = require('hex2ascii');
              let messageTime = parseInt(message.split(':')[1])
              let currentTime = parseInt(new Date().getTime().toString().slice(0, -3))
              let msElapsed = currentTime - messageTime
-             let minutesElapsed = (msElapsed/1000)/60
+             let minutesElapsed = msElapsed/60
 
-             if (minutesElapsed >= 5)
+             if (minutesElapsed >= 5) {
                 reject("Time elapsed has to be less than 5 minutes")
+                return
+             }
 
-            if (!bitcoinMessage.verify(message, address, signature))
+            if (!bitcoinMessage.verify(message, address, signature)) {
                 reject("Message couldn't be verified")
+                return
+            }
 
             let block = new BlockClass.Block(
                 {
@@ -157,8 +161,10 @@ const hex2ascii = require('hex2ascii');
          return new Promise((resolve, reject) => {
             let block = this.chain.filter(b => b.hash === hash)[0]
 
-            if (!block)
+            if (!block) {
                 resolve(null)
+                return
+            }
 
             resolve(block)
          });

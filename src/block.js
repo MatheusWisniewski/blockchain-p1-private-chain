@@ -73,13 +73,17 @@
 
          let self = this;
          return new Promise((resolve, reject) => {
-            if (self.height === 0)
+            if (self.height === 0) {
                 reject("This is the Genesis Block")
+                return
+            }
             
             let decoded = JSON.parse(hex2ascii(self.body)); 
 
-            if (!decoded)
+            if (!decoded) {
                 reject("Data couldn't be decoded")
+                return
+            }
 
             resolve(decoded)
          });
