@@ -40,15 +40,17 @@
          return new Promise((resolve, reject) => {
             // Save in auxiliary variable the current block hash
             let aux = self.hash
+
+            self.hash = null
             
-             // Recalculate the hash of the Block
-             self.hash = SHA256(JSON.stringify(self)).toString()
-             // Comparing if the hashes changed
+            // Recalculate the hash of the Block
+            self.hash = SHA256(JSON.stringify(self)).toString()
+            // Comparing if the hashes changed
 
-             if (aux === self.hash)
+            if (aux === self.hash) 
+                resolve(true)
+            else
                 resolve(false)
-
-            resolve(true)
              // Returning the Block is not valid
              
              // Returning the Block is valid

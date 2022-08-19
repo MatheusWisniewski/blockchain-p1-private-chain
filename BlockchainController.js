@@ -117,6 +117,21 @@
         });
     }
 
+    validateChain() {
+        this.app.get("/validateChain", async (req, res) => {
+
+
+                let errorLog = await this.blockchain.validateChain();
+                if(errorLog.length === 0){
+                    return res.status(200).json(block);
+                } else {
+                    return res.status(404).send(JSON.stringify(errorLog));
+                }
+
+            
+        });
+    }
+
 }
 
 module.exports = (app, blockchainObj) => { return new BlockchainController(app, blockchainObj);}

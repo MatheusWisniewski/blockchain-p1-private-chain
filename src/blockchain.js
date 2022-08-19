@@ -66,27 +66,26 @@ const hex2ascii = require('hex2ascii');
      _addBlock(block) {
          let self = this;
          return new Promise(async (resolve, reject) => {
-            if (this.chain.length === 0) {
+            if (self.chain.length === 0) {
                 block.height = 0
             }
             else {
-                let previousBlock = this.chain[this.chain.length-1]
+                let previousBlock = self.chain[self.chain.length-1]
                 block.height = previousBlock.height + 1
                 block.previousBlockHash = previousBlock.hash
             }
 
             block.time = new Date().getTime().toString().slice(0,-3)
 
-            block.validate().then(
-                (resolved) => {
-                    this.chain.push(block)
-                    this.height = this.chain.length - 1
-                    resolve(true)
-                },
-                (rejected) => {
-                    reject("Block couldn't validate so it wasn't pushed into the chain")
-                })
-         });
+            if (await self.validateChain()) {
+                self.chain.push(block)
+                self.height = block.height
+                resolve(true)
+            }
+            else {
+                resolve(false)
+            }
+        })
      }
  
      /**
@@ -159,7 +158,7 @@ const hex2ascii = require('hex2ascii');
      getBlockByHash(hash) {
          let self = this;
          return new Promise((resolve, reject) => {
-            let block = this.chain.filter(b => b.hash === hash)[0]
+            let block = this.chain.find(b => b.hash === hash)
 
             if (!block) {
                 resolve(null)
@@ -178,7 +177,7 @@ const hex2ascii = require('hex2ascii');
      getBlockByHeight(height) {
          let self = this;
          return new Promise((resolve, reject) => {
-             let block = self.chain.filter(p => p.height === height)[0];
+             let block = self.chain.find(p => p.height === height);
              if(block){
                  resolve(block);
              } else {
@@ -219,19 +218,21 @@ const hex2ascii = require('hex2ascii');
          let self = this;
          let errorLog = [];
          return new Promise(async (resolve, reject) => {
-             this.chain.forEach(block => {
-                block.validate().then(
-                    (resolved) => {
-                        if (block.height !== 0) {
-                            let previousBlock = this.chain[block.height-1]
-                            if (previousBlock.hash !== block.previousBlockHash) {
-                                errorLog.push(`Block with height ${block.height} has a wrong previousBlockHash`)
-                            }
-                        }
-                    },
-                    (rejected) => {
-                        errorLog.push(`Couldn't validate block with height ${block.height}`)
-                    })
+             self.chain.forEach(block => {
+                let isValid = await block.validate()
+
+                if (!isValid) {
+                    errorLog.push(`Couldn't validate block with height ${block.height}`)
+                    return
+                }
+                
+                if (block.height === 0) 
+                    return
+
+                let previousBlock = self.chain[block.height-1]
+                if (previousBlock.hash !== block.previousBlockHash) {
+                    errorLog.push(`Block with height ${block.height} has a wrong previousBlockHash`)
+                }
              })
 
              resolve(errorLog)
