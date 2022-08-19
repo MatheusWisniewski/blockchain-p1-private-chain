@@ -76,6 +76,7 @@ const hex2ascii = require('hex2ascii');
             }
 
             block.time = new Date().getTime().toString().slice(0,-3)
+            block.hash = SHA256(JSON.stringify(block)).toString()
 
             if (await self.validateChain()) {
                 self.chain.push(block)
@@ -218,7 +219,7 @@ const hex2ascii = require('hex2ascii');
          let self = this;
          let errorLog = [];
          return new Promise(async (resolve, reject) => {
-             self.chain.forEach(block => {
+             self.chain.forEach(async block => {
                 let isValid = await block.validate()
 
                 if (!isValid) {
