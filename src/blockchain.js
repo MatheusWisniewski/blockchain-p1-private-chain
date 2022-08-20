@@ -82,10 +82,10 @@
             if (errorLog.length === 0) {
                 self.chain.push(block)
                 self.height = block.height
-                resolve(true)
+                resolve(block)
             }
             else {
-                resolve(false)
+                reject(errorLog)
             }
         })
      }
@@ -145,9 +145,13 @@
                     "star": star
                 })
 
-            this._addBlock(block)
-
-            resolve(block)
+            try {
+                let blockAdded = await this._addBlock(block)
+                resolve(blockAdded)
+            }
+            catch (error) {
+                reject(error)
+            }
          });
      }
  

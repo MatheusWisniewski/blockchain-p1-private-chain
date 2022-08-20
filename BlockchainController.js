@@ -17,6 +17,10 @@
         this.getBlockByHash();
         this.getStarsByOwner();
         this.validateChain();
+
+        // Extra endpoints for testing
+        this.changeBlockBody();
+        this.getChain();
     }
 
     // Enpoint to Get a Block by Height (GET Endpoint)
@@ -126,6 +130,33 @@
             } else {
                 return res.status(404).send(JSON.stringify(errorLog));
             }
+        });
+    }
+
+    // Extra endpoint for testing
+    changeBlockBody() {
+        this.app.put("/changeBlockBody/:hash", async (req, res) => {
+            if(req.params.hash) {
+                const hash = req.params.hash;
+                let block = await this.blockchain.getBlockByHash(hash);
+
+                if(block){
+                    const newBody = Buffer.from(JSON.stringify(req.body)).toString('hex'); 
+                    block.body = newBody
+                    return res.status(200).json(block);
+                } else {
+                    return res.status(404).send("Block Not Found!");
+                }
+            } else {
+                return res.status(404).send("Block Not Found! Review the Parameters!");
+            }
+        });
+    }
+
+    // Extra endpoint for testing
+    getChain() {
+        this.app.get("/getChain", async (req, res) => {
+            return res.status(200).json(this.blockchain.chain);
         });
     }
 
