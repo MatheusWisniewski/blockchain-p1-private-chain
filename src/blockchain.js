@@ -164,7 +164,7 @@
      getBlockByHash(hash) {
          let self = this;
          return new Promise((resolve, reject) => {
-            let block = this.chain.find(b => b.hash === hash)
+            let block = self.chain.find(b => b.hash === hash)
             if(block){
                 resolve(block);
             } else {
