@@ -11,8 +11,7 @@
  const SHA256 = require('crypto-js/sha256');
  const BlockClass = require('./block.js');
  const bitcoinMessage = require('bitcoinjs-message');
-const { bitcoin } = require('bitcoinjs-lib/src/networks.js');
-const hex2ascii = require('hex2ascii');
+ const hex2ascii = require('hex2ascii');
  
  class Blockchain {
  
@@ -78,7 +77,9 @@ const hex2ascii = require('hex2ascii');
             block.time = new Date().getTime().toString().slice(0,-3)
             block.hash = SHA256(JSON.stringify(block)).toString()
 
-            if (await self.validateChain()) {
+            let errorLog = await self.validateChain()
+
+            if (errorLog.length === 0) {
                 self.chain.push(block)
                 self.height = block.height
                 resolve(true)
@@ -219,22 +220,17 @@ const hex2ascii = require('hex2ascii');
          let self = this;
          let errorLog = [];
          return new Promise(async (resolve, reject) => {
-             self.chain.forEach(async block => {
+             for (const block of self.chain) {
                 let isValid = await block.validate()
 
                 if (!isValid) {
                     errorLog.push(`Couldn't validate block with height ${block.height}`)
-                    return
                 }
                 
-                if (block.height === 0) 
-                    return
-
-                let previousBlock = self.chain[block.height-1]
-                if (previousBlock.hash !== block.previousBlockHash) {
+                if (block.height > 0 && self.chain[block.height-1].hash !== block.previousBlockHash) {
                     errorLog.push(`Block with height ${block.height} has a wrong previousBlockHash`)
                 }
-             })
+             }
 
              resolve(errorLog)
          });
