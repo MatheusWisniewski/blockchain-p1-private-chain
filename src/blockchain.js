@@ -165,13 +165,11 @@
          let self = this;
          return new Promise((resolve, reject) => {
             let block = this.chain.find(b => b.hash === hash)
-
-            if (!block) {
-                resolve(null)
-                return
+            if(block){
+                resolve(block);
+            } else {
+                resolve(null);
             }
-
-            resolve(block)
          });
      }
  
