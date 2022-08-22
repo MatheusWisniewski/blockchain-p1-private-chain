@@ -37,19 +37,12 @@
       */
      validate() {
          let self = this;
-         return new Promise((resolve, reject) => {
-            // Save in auxiliary variable the current block hash
-            let oldHash = self.hash
-
-            self.hash = null
-            
+         return new Promise((resolve, reject) => {            
             // Recalculate the hash of the Block
-            let newHash = SHA256(JSON.stringify(self)).toString()
+            let newHash = SHA256(JSON.stringify({...self, hash:null})).toString()
 
-            self.hash = oldHash
-            // Comparing if the hashes changed
-
-            if (oldHash !== newHash) {
+            // Comparing if the hash changed
+            if (self.hash !== newHash) {
                 // Returning the Block is not valid
                 resolve(false)
             }
